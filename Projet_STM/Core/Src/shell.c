@@ -68,7 +68,7 @@ int shell_add(char c, int (* pfunc)(int argc, char ** argv), char * description)
 	return -1;
 }
 
-static int shell_exec(char * buf) {
+int shell_exec(char * buf) {
 	int i;
 
 	char c = buf[0];
