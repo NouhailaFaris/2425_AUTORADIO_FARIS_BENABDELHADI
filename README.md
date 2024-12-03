@@ -58,5 +58,20 @@ Pour Tester on a fixer notre NRESET à 1 par un GPIO out (PA0).
 ## 2.3 Driver 
 
 
+![image](https://github.com/user-attachments/assets/e74f3bcb-2989-41df-b8e6-621c9ef47de4)
 
+![image](https://github.com/user-attachments/assets/4f3ae65a-d6af-47c6-97bd-3d273e28a9d5)
+
+## Le CODEC Audio SGTL5000
+### Configuration préalables
+Pins utilisées pour l’I2C:
+. I2C_SCL : PB10
+. I2C_SDA : PB11
+Ces broches correspondent au I2C2 dans le STM32 L476RG.
+
+### Configuration:
+
+![image](https://github.com/user-attachments/assets/088c63a5-67f1-4265-9644-69022190d343)
+
+![image](https://github.com/user-attachments/assets/1ffd857c-37e3-4d9d-abd4-fd437adf69e1)
 
