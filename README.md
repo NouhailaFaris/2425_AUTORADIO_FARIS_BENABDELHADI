@@ -58,5 +58,6 @@ Pour Tester on a fixer notre NRESET à 1 par un GPIO out (PA0).
 ## 2.3 Driver 
 
 
+![image](https://github.com/user-attachments/assets/e74f3bcb-2989-41df-b8e6-621c9ef47de4)
 
 
