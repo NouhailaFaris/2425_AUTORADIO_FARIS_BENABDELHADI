@@ -76,3 +76,18 @@ Ces broches correspondent au I2C2 dans le STM32 L476RG.
 ![image](https://github.com/user-attachments/assets/1ffd857c-37e3-4d9d-abd4-fd437adf69e1)
 
 ![image](https://github.com/user-attachments/assets/a522406e-ac0f-4e58-9f31-19dedb4f0a62)
+
+
+— CHIP_ANA_POWER:0x7260
+— CHIP_LINREG_CTRL:0x006C
+— CHIP_REF_CTRL:0x01F2
+— CHIP_LINE_OUT_CTRL:0x0F22
+— CHIP_SHORT_CTRL:0x1106
+— CHIP_ANA_CTRL:0x0137
+— CHIP_DIG_POWER:0x0073
+— CHIP_LINE_OUT_VOL:0x1F1F
+— CHIP_CLK_CTRL:0x0008
+— CHIP_I2S_CTRL:0x0130
+— CHIP_ADCDAC_CTRL:0x0000
+— CHIP_DAC_VOL:0x3C3C
+
