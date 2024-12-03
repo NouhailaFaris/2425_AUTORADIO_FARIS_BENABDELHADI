@@ -1,9 +1,9 @@
 /* USER CODE BEGIN Header */
 /**
- ******************************************************************************
+ **************************
  * @file           : main.c
  * @brief          : Main program body
- ******************************************************************************
+ **************************
  * @attention
  *
  * Copyright (c) 2024 STMicroelectronics.
@@ -13,121 +13,91 @@
  * in the root directory of this software component.
  * If no LICENSE file comes with this software, it is provided AS-IS.
  *
- ******************************************************************************
+ **************************
  */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "cmsis_os.h"
+#include "spi.h"
 #include "usart.h"
 #include "gpio.h"
-
-/* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
 #include <stdio.h>
-#include <stdlib.h>
-#include "shell.h"
-/* USER CODE END Includes */
 
-/* Private typedef -----------------------------------------------------------*/
-/* USER CODE BEGIN PTD */
+/* Private defines -----------------------------------------------------------*/
+#define MCP23S17_WRITE_OPCODE  0x40  // Opcode pour écriture dans le MCP23S17
+#define MCP23S17_IODIRB        0x01  // Registre pour configurer les broches du PORTB
+#define MCP23S17_GPIOB         0x13  // Registre pour contrôler les LEDs sur PORTB
+#define MCP23S17_IODIRA        0x00  // Registre pour configurer les broches du PORTA
+#define MCP23S17_GPIOA         0x12  // Registre pour contrôler les LEDs sur PORTA
 
-/* USER CODE END PTD */
-
-/* Private define ------------------------------------------------------------*/
-/* USER CODE BEGIN PD */
-#define TASK_SHELL_STACK_DEPTH 512
-#define TASK_SHELL_PRIORITY 1
-
-/* USER CODE END PD */
-
-/* Private macro -------------------------------------------------------------*/
-/* USER CODE BEGIN PM */
-
-/* USER CODE END PM */
+#define GPIO_EXPANDER_CS_PIN   GPIO_PIN_7
+#define GPIO_EXPANDER_CS_PORT  GPIOB
 
 /* Private variables ---------------------------------------------------------*/
 
-/* USER CODE BEGIN PV */
-TaskHandle_t h_task_shell = NULL;
-static char rx_char;
-static char rx_buffer[BUFFER_SIZE];
-static uint16_t rx_index = 0;
-
-/* USER CODE END PV */
-
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-void MX_FREERTOS_Init(void);
-/* USER CODE BEGIN PFP */
+void GPIOExpander_Select(void);
+void GPIOExpander_Deselect(void);
+void GPIOExpander_WriteRegister(uint8_t reg, uint8_t value);
+void GPIOExpander_Init(void);
+void GPIOExpander_SetLED(uint8_t value);
 
-/* USER CODE END PFP */
+/* Redirect printf to UART */
+int __io_putchar(int ch) {
+    HAL_UART_Transmit(&huart2, (uint8_t*)&ch, 1, HAL_MAX_DELAY);
+    return ch;
+}
 
-/* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-int __io_putchar(int ch)
-{
-	HAL_UART_Transmit(&huart2, (uint8_t*)&ch, 1, HAL_MAX_DELAY);
+// Fonction pour sélectionner le GPIO Expander
+void GPIOExpander_Select(void) {
 
-	return ch;
+    HAL_GPIO_WritePin(GPIO_EXPANDER_CS_PORT, GPIO_EXPANDER_CS_PIN, GPIO_PIN_RESET);
+    printf("CS LOW\r\n");
 }
 
-int fonction(int argc, char ** argv)
-{
-	printf("Je suis une fonction bidon\r\n");
+// Fonction pour désélectionner le GPIO Expander
+void GPIOExpander_Deselect(void) {
 
-	return 0;
-}
-void ShellTask(void *argument)
-{
-    shell_init();
-    shell_add('f', fonction, "fonction inutile");
-
-    printf("Shell démarré. Tapez vos commandes :\r\n");
-    HAL_UART_Receive_IT(&huart2, (uint8_t *)&rx_char, 1); // Activer les interruptions UART
-
-    while (1)
-    {
-        osDelay(1); // Tâche en veille, tout est géré par les interruptions
-    }
+    HAL_GPIO_WritePin(GPIO_EXPANDER_CS_PORT, GPIO_EXPANDER_CS_PIN, GPIO_PIN_SET);
+    printf("CS HIGH\r\n");
 }
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
-    if (huart->Instance == USART2)  // Vérifiez que l'interruption provient de l'UART2
-    {
-        static char cmd_buffer[BUFFER_SIZE];
-        static uint16_t pos = 0;
+// Fonction pour écrire dans un registre du MCP23S17
+void GPIOExpander_WriteRegister(uint8_t reg, uint8_t value) {
+    uint8_t data[3] = {MCP23S17_WRITE_OPCODE, reg, value};
 
-        if (rx_char == '\r')  // Si l'utilisateur appuie sur Entrée
-        {
-            cmd_buffer[pos] = '\0';  // Terminer la commande
-            printf("\r\nCommande reçue : %s\r\n", cmd_buffer);
-            shell_exec(cmd_buffer);  // Exécuter la commande via le Shell
-            pos = 0;  // Réinitialiser le buffer
-        }
-        else if (rx_char == '\b')  // Gestion du retour arrière
-        {
-            if (pos > 0)
-            {
-                pos--;  // Supprimer le dernier caractère
-                printf("\b \b");  // Effacer le caractère sur le terminal
-            }
-        }
-        else if (pos < BUFFER_SIZE - 1)  // Ajouter le caractère au buffer
-        {
-            cmd_buffer[pos++] = rx_char;
-            HAL_UART_Transmit(&huart2, (uint8_t *)&rx_char, 1, HAL_MAX_DELAY);  // Écho sur le terminal
-        }
-
-        // Relancer la réception pour le prochain caractère
-        HAL_UART_Receive_IT(&huart2, (uint8_t *)&rx_char, 1);
-    }
+    GPIOExpander_Select();
+    HAL_SPI_Transmit(&hspi3, data, 3, HAL_MAX_DELAY);
+    HAL_SPI_Receive(&hspi3, &value, 3, HAL_MAX_DELAY);
+    HAL_Delay(1);
+    GPIOExpander_Deselect();
+    HAL_Delay(1);
+    printf("Valeur lue : 0x%02X\r\n", value);
 }
 
+// Initialisation du MCP23S17
+void GPIOExpander_Init(void) {
+    printf("Initialisation du GPIO Expander...\r\n");
+    GPIOExpander_WriteRegister(MCP23S17_IODIRB, 0x00);
+    GPIOExpander_WriteRegister(MCP23S17_GPIOB, 0x00);
+    GPIOExpander_WriteRegister(MCP23S17_IODIRA, 0x00);
+    GPIOExpander_WriteRegister(MCP23S17_GPIOA, 0x00);
+    printf("Initialisation terminée\r\n");
+}
+
+// Fonction pour contrôler les LEDs via GPIOA
+void GPIOExpander_SetLEDA(uint8_t value) {
 
 
+    GPIOExpander_WriteRegister(MCP23S17_GPIOA, value);
+}
+void GPIOExpander_SetLEDB(uint8_t value) {
+
+    GPIOExpander_WriteRegister(MCP23S17_GPIOB, value);
+   }
 /* USER CODE END 0 */
 
 /**
@@ -136,67 +106,34 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
   */
 int main(void)
 {
+    /* MCU Configuration--------------------------------------------------------*/
+    HAL_Init();
+    SystemClock_Config();
+    MX_GPIO_Init();
+    MX_USART2_UART_Init();
+    MX_SPI3_Init();
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, GPIO_PIN_SET);
 
-  /* USER CODE BEGIN 1 */
+    /* Initialize the GPIO Expander */
+    GPIOExpander_Init();
 
-  /* USER CODE END 1 */
+    printf("Démarrage de l'effet chenillard\r\n");
 
-  /* MCU Configuration--------------------------------------------------------*/
-
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
-
-  /* USER CODE BEGIN Init */
-
-  /* USER CODE END Init */
-
-  /* Configure the system clock */
-  SystemClock_Config();
-
-  /* USER CODE BEGIN SysInit */
-
-  /* USER CODE END SysInit */
-
-  /* Initialize all configured peripherals */
-  MX_GPIO_Init();
-  MX_USART2_UART_Init();
-  /* USER CODE BEGIN 2 */
-	if (xTaskCreate(ShellTask, "Shell", TASK_SHELL_STACK_DEPTH, NULL, TASK_SHELL_PRIORITY, &h_task_shell) != pdPASS)
-	{
-		printf("Error creating task shell\r\n");
-		Error_Handler();
-	}
-	vTaskStartScheduler();
+    /* Infinite loop */
+    while (1) {
 
 
-  /* USER CODE END 2 */
-
-  /* Call init function for freertos objects (in cmsis_os2.c) */
-  MX_FREERTOS_Init();
-
-  /* Start scheduler */
-  osKernelStart();
-
-  /* We should never get here as control is now taken by the scheduler */
-
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-	while (1)
-	{
-    /* USER CODE END WHILE */
-
-    /* USER CODE BEGIN 3 */
-
-		//printf("Hello\r\n");
-		//HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
-		//HAL_Delay(500);
-		//HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
-		//HAL_Delay(500);
-
-	}
-  /* USER CODE END 3 */
+            // Chenillard sur PORTB
+            for (int i = 0; i < 8; i++) {
+                GPIOExpander_SetLEDA(1 << i);
+                HAL_Delay(500);
+            }
+            for (int i = 0; i < 8; i++) {
+                            GPIOExpander_SetLEDB(1 << i);
+                            HAL_Delay(500);
+                        }
+    }
 }
-
 /**
   * @brief System Clock Configuration
   * @retval None

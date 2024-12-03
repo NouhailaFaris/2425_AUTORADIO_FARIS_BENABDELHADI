@@ -67,7 +67,6 @@ int shell_add(char c, int (* pfunc)(int argc, char ** argv), char * description)
 
 	return -1;
 }
-
 int shell_exec(char * buf) {
 	int i;
 
