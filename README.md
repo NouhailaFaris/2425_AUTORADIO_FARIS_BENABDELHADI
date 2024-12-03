@@ -53,6 +53,10 @@ Pour Tester on a fixer notre NRESET à 1 par un GPIO out (PA0).
 
 ![WhatsApp Image 2024-12-03 at 10 49 06](https://github.com/user-attachments/assets/a01e39d6-ecfb-473b-add9-7959a40b2433)
 
-![WhatsApp Image 2024-12-03 at 10 53 49](https://github.com/user-attachments/assets/08a70a17-b8d9-4c6e-ac3d-d72e4ce37636)
+![WhatsApp Image 2024-12-03 at 11 24 23](https://github.com/user-attachments/assets/76d48152-f890-4c09-ad66-b5fd9d58ca21)
+
+## 2.3 Driver 
+
+
 
 
