@@ -32,3 +32,12 @@ Réalisé par FARIS et BENABDELHADI
 
 2- Le SPI 1 est deja utilisé par le STM32
 
+3- il faut configurer le SPI MOSI/ SPI MISO/ SPI SCK/ SPI NCS comme dans le modele Kicad
+
+![image](https://github.com/user-attachments/assets/723572ae-4657-4ad3-933d-c4e695a57bdf)
+
+![image](https://github.com/user-attachments/assets/b3cfbfe9-081d-4cc1-a1e4-334830acffca)
+
+![image](https://github.com/user-attachments/assets/3271d4c8-f29a-4b7b-a30a-5862cbd4b577)
+
+
