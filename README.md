@@ -38,6 +38,21 @@ Réalisé par FARIS et BENABDELHADI
 
 ![image](https://github.com/user-attachments/assets/b3cfbfe9-081d-4cc1-a1e4-334830acffca)
 
+4-configuration sur STM32
+
 ![image](https://github.com/user-attachments/assets/3271d4c8-f29a-4b7b-a30a-5862cbd4b577)
+
+![image](https://github.com/user-attachments/assets/be5ced25-f650-4c0f-9ea2-898547a8e047)
+
+
+## 2.2 Tests
+
+**Remarque**
+
+Pour Tester on a fixer notre NRESET à 1 par un GPIO out (PA0).
+
+![WhatsApp Image 2024-12-03 at 10 49 06](https://github.com/user-attachments/assets/a01e39d6-ecfb-473b-add9-7959a40b2433)
+
+![WhatsApp Image 2024-12-03 at 10 53 49](https://github.com/user-attachments/assets/08a70a17-b8d9-4c6e-ac3d-d72e4ce37636)
 
 
