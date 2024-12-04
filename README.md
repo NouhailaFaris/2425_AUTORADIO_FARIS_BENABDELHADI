@@ -127,4 +127,5 @@ Ces broches correspondent au I2C2 dans le STM32 L476RG.
 — CHIP_ADCDAC_CTRL:0x000C
 
 — CHIP_DAC_VOL: 0x3C3C
-
+**config**
+![image](https://github.com/user-attachments/assets/38343d67-56f7-4a84-867b-46fa23631baa)
