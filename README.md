@@ -86,9 +86,18 @@ Ces broches correspondent au I2C2 dans le STM32 L476RG.
 
 ![image](https://github.com/user-attachments/assets/1ffd857c-37e3-4d9d-abd4-fd437adf69e1)
 
+### Signal MCLK
+
+![scope_1](https://github.com/user-attachments/assets/15dea245-b1a5-43cf-a54c-e2c7bacb927a)
+
 ![image](https://github.com/user-attachments/assets/5ec7929f-fee0-4a5a-a459-cbe490cafe41)
 
 ![image](https://github.com/user-attachments/assets/7c6f0cca-d996-4794-b3c7-0dd7e8ae576d)
+
+### Trames I2C 
+
+![scope_0](https://github.com/user-attachments/assets/97d2ad78-aa4f-4438-bae0-850677dc9583)
+
 
 — CHIP_ANA_POWER: 0x0030
 
