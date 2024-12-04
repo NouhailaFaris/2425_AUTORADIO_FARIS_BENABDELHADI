@@ -63,11 +63,12 @@ Pour Tester on a fixer notre NRESET à 1 par un GPIO out (PA0).
 ![image](https://github.com/user-attachments/assets/4f3ae65a-d6af-47c6-97bd-3d273e28a9d5)
 
 
-Utilisation du Driver avec le shell 
+### Utilisation du Driver avec le shell 
 
 2 fonction sont réalisé :
 
 a = allumer tout les leds 
+
 l avec 2 argument =  pour allumer une led specifique ou l'eteindre 
 
 ![image](https://github.com/user-attachments/assets/0e95ceca-a1b2-4067-bc5b-c525b3b96929)
@@ -76,8 +77,11 @@ l avec 2 argument =  pour allumer une led specifique ou l'eteindre
 ## Le CODEC Audio SGTL5000
 ### Configuration préalables
 Pins utilisées pour l’I2C:
+
 . I2C_SCL : PB10
+
 . I2C_SDA : PB11
+
 Ces broches correspondent au I2C2 dans le STM32 L476RG.
 
 ### Configuration:
@@ -98,6 +102,7 @@ Ces broches correspondent au I2C2 dans le STM32 L476RG.
 
 ![scope_0](https://github.com/user-attachments/assets/97d2ad78-aa4f-4438-bae0-850677dc9583)
 
+**5**
 
 — CHIP_ANA_POWER: 0x0030
 
