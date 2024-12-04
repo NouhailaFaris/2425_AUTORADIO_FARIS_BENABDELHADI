@@ -88,6 +88,7 @@ Ces broches correspondent au I2C2 dans le STM32 L476RG.
 
 ![image](https://github.com/user-attachments/assets/5ec7929f-fee0-4a5a-a459-cbe490cafe41)
 
+![image](https://github.com/user-attachments/assets/7c6f0cca-d996-4794-b3c7-0dd7e8ae576d)
 
 — CHIP_ANA_POWER: 0x0030
 
