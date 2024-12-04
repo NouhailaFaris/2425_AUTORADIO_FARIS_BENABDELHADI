@@ -6,12 +6,15 @@
  */
 
 #include "shell.h"
-
 #include <stdio.h>
-
 #include "usart.h"
 #include "gpio.h"
+#include "Driver_LED.h"
+#include <stdlib.h>
 
+extern Driver_LED_HandleTypeDef led_driver;
+
+static char print_buffer[BUFFER_SIZE];
 typedef struct{
 	char c;
 	int (* func)(int argc, char ** argv);
@@ -48,13 +51,14 @@ static int sh_help(int argc, char ** argv) {
 }
 
 void shell_init() {
-	int size = 0;
+    int size = 0;
 
-	size = snprintf (print_buffer, BUFFER_SIZE, "\r\n\r\n===== Monsieur Shell v0.2 =====\r\n");
-	uart_write(print_buffer, size);
+    size = snprintf(print_buffer, BUFFER_SIZE, "\r\n\r\n===== Monsieur Shell v0.2 =====\r\n");
+    uart_write(print_buffer, size);
 
-	shell_add('h', sh_help, "Help");
+    shell_add('h', sh_help, "Help");
 }
+
 
 int shell_add(char c, int (* pfunc)(int argc, char ** argv), char * description) {
 	if (shell_func_list_size < SHELL_FUNC_LIST_MAX_SIZE) {

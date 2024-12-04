@@ -22,29 +22,105 @@
 #include "usart.h"
 #include "gpio.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include "Driver_LED.h"
+#include "shell.h"
+#include "FreeRTOS.h"
+#include "task.h"
+
+
 
 /* Private defines -----------------------------------------------------------*/
-#define GPIO_EXPANDER_CS_PIN   GPIO_PIN_7
-#define GPIO_EXPANDER_CS_PORT  GPIOB
-
+#define TASK_SHELL_STACK_DEPTH 512
+#define TASK_SHELL_PRIORITY 1
+#define BUFFER_SIZE 64
+static char print_buffer[BUFFER_SIZE];
 /* Private variables ---------------------------------------------------------*/
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-void GPIOExpander_Select(void);
-void GPIOExpander_Deselect(void);
-void GPIOExpander_WriteRegister(uint8_t reg, uint8_t value);
-void GPIOExpander_Init(void);
-void GPIOExpander_SetLED(uint8_t value);
+void MX_FREERTOS_Init(void);
 
-Driver_LED_HandleTypeDef led_driver;
-/* Redirect printf to UART */
+TaskHandle_t h_task_shell = NULL;
+Driver_LED_HandleTypeDef led_driver = {
+		.hspi = &hspi3,
+		.cs_port = GPIOB,
+		.cs_pin = GPIO_PIN_7
+};/* Redirect printf to UART */
+
 int __io_putchar(int ch) {
 	HAL_UART_Transmit(&huart2, (uint8_t*)&ch, 1, HAL_MAX_DELAY);
 	return ch;
 }
+static int uart_write(char *s, uint16_t size) {
+	HAL_UART_Transmit(&huart2, (uint8_t*)s, size, HAL_MAX_DELAY);
+	return size;
+}
+static int sh_led(int argc, char **argv) {
+	if (argc < 3) { // Vérifie si le nombre d'arguments est suffisant
+		int size = snprintf(print_buffer, BUFFER_SIZE, "Usage: l <led_number> <state>\r\n");
+		uart_write(print_buffer, size);
+		return -1;
+	}
 
+	int led_number = atoi(argv[1]); // Convertit le numéro de la LED en entier
+	int state = atoi(argv[2]);      // Convertit l'état en entier
+
+	if (led_number < 0 || led_number > 15) { // Vérifie si le numéro de LED est valide
+		int size = snprintf(print_buffer, BUFFER_SIZE, "Error: Invalid LED number. Must be between 0 and 15.\r\n");
+		uart_write(print_buffer, size);
+		return -1;
+	}
+
+	if (state != 0 && state != 1) { // Vérifie si l'état est valide
+		int size = snprintf(print_buffer, BUFFER_SIZE, "Error: Invalid state. Must be 0 or 1.\r\n");
+		uart_write(print_buffer, size);
+		return -1;
+	}
+
+	// Détermine si la LED est sur GPIOA ou GPIOB
+	if (led_number < 8) {
+		uint8_t mask = 1 << led_number;
+		uint8_t current_state = Driver_LED_ReadLEDA(&led_driver);
+
+		if (state == 1) {
+			Driver_LED_SetLEDA(&led_driver, current_state & ~mask); // Allume la LED
+		} else {
+			Driver_LED_SetLEDA(&led_driver, current_state | mask);  // Éteint la LED
+		}
+	} else {
+		uint8_t mask = 1 << (led_number - 8);
+		uint8_t current_state = Driver_LED_ReadLEDB(&led_driver);
+
+		if (state == 1) {
+			Driver_LED_SetLEDB(&led_driver, current_state & ~mask); // Allume la LED
+		} else {
+			Driver_LED_SetLEDB(&led_driver, current_state | mask);  // Éteint la LED
+		}
+	}
+
+	int size = snprintf(print_buffer, BUFFER_SIZE, "LED %d set to %d\r\n", led_number, state);
+	uart_write(print_buffer, size);
+
+	return 0;
+}
+
+static int sh_led_all_on(int argc, char **argv) {
+	Driver_LED_SetLEDA(&led_driver, 0x00); // Allume toutes les LEDs sur PORTA
+	Driver_LED_SetLEDB(&led_driver, 0x00); // Allume toutes les LEDs sur PORTB
+
+	int size = snprintf(print_buffer, BUFFER_SIZE, "All LEDs are ON\r\n");
+	uart_write(print_buffer, size);
+	return 0;
+}
+
+void task_shell(void * unused)
+{
+	shell_init();
+	shell_add('l', sh_led, "Led <led_number> <state> - Control LED");
+	shell_add('a', sh_led_all_on, "Allumer toutes les LEDs");
+	shell_run();	// boucle infinie
+}
 /* USER CODE BEGIN 0 */
 
 
@@ -62,50 +138,51 @@ int main(void)
 	MX_GPIO_Init();
 	MX_USART2_UART_Init();
 	MX_SPI3_Init();
+
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, GPIO_PIN_SET);
 
-
-	Driver_LED_HandleTypeDef led_driver = {
-			.hspi = &hspi3,
-			.cs_port = GPIOB,
-			.cs_pin = GPIO_PIN_7
-	};
-	/* Initialize the GPIO Expander */
+	// Initialiser le driver avant d'exécuter le shell
 	Driver_LED_Init(&led_driver);
 
 
+	if (xTaskCreate(task_shell, "Shell", TASK_SHELL_STACK_DEPTH, NULL, TASK_SHELL_PRIORITY, &h_task_shell) != pdPASS) {
+		printf("Error creating task shell\r\n");
+		Error_Handler();
+	}
+
+	vTaskStartScheduler();
 
 	/* Infinite loop */
 	while (1) {
 
 
-		Driver_LED_SetLEDB(&led_driver, 0x00); // Toutes les LEDs sur PORTA ON
-		HAL_Delay(100);
-
-		// Éteindre toutes les LEDs sur PORTA
-		Driver_LED_SetLEDB(&led_driver, 0xFF); // Toutes les LEDs sur PORTA OFF
-		HAL_Delay(100);
-
-		Driver_LED_SetLEDA(&led_driver, 0x00); // Toutes les LEDs sur PORTA ON
-		HAL_Delay(100);
-
-		// Éteindre toutes les LEDs sur PORTA
-		Driver_LED_SetLEDA(&led_driver, 0xFF); // Toutes les LEDs sur PORTA OFF
-		HAL_Delay(100);
-
-		// Boucle pour allumer les LEDs sur PORTA (LEDs 1 à 8)
-		for (uint8_t i = 0; i < 8; i++) {
-			Driver_LED_SetLEDA(&led_driver, ~(1 << i)); // Active bas : ~ pour inverser
-			HAL_Delay(500);
-			Driver_LED_SetLEDA(&led_driver, 0xFF); // Éteindre après chaque étape
-		}
-
-		// Boucle pour allumer les LEDs sur PORTB (LEDs 9 à 16)
-		for (uint8_t i = 0; i < 8; i++) {
-			Driver_LED_SetLEDB(&led_driver, ~(1 << i)); // Active bas : ~ pour inverser
-			HAL_Delay(500);
-			Driver_LED_SetLEDB(&led_driver, 0xFF); // Éteindre après chaque étape
-		}
+		//				Driver_LED_SetLEDB(&led_driver, 0x00); // Toutes les LEDs sur PORTA ON
+		//				HAL_Delay(100);
+		//
+		//				// Éteindre toutes les LEDs sur PORTA
+		//				Driver_LED_SetLEDB(&led_driver, 0xFF); // Toutes les LEDs sur PORTA OFF
+		//				HAL_Delay(100);
+		//
+		//				Driver_LED_SetLEDA(&led_driver, 0x00); // Toutes les LEDs sur PORTA ON
+		//				HAL_Delay(100);
+		//
+		//				// Éteindre toutes les LEDs sur PORTA
+		//				Driver_LED_SetLEDA(&led_driver, 0xFF); // Toutes les LEDs sur PORTA OFF
+		//				HAL_Delay(100);
+		//
+		//				// Boucle pour allumer les LEDs sur PORTA (LEDs 1 à 8)
+		//				for (uint8_t i = 0; i < 8; i++) {
+		//					Driver_LED_SetLEDA(&led_driver, ~(1 << i)); // Active bas : ~ pour inverser
+		//					HAL_Delay(500);
+		//					Driver_LED_SetLEDA(&led_driver, 0xFF); // Éteindre après chaque étape
+		//				}
+		//
+		//				// Boucle pour allumer les LEDs sur PORTB (LEDs 9 à 16)
+		//				for (uint8_t i = 0; i < 8; i++) {
+		//					Driver_LED_SetLEDB(&led_driver, ~(1 << i)); // Active bas : ~ pour inverser
+		//					HAL_Delay(500);
+		//					Driver_LED_SetLEDB(&led_driver, 0xFF); // Éteindre après chaque étape
+		//				}
 
 	}
 }
