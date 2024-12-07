@@ -124,8 +124,33 @@ Ces broches correspondent au I2C2 dans le STM32 L476RG.
 
 — CHIP_I2S_CTRL: 0x0001
 
+
+
+
+
+
 — CHIP_ADCDAC_CTRL:0x000C
 
 — CHIP_DAC_VOL: 0x3C3C
 **config**
 ![image](https://github.com/user-attachments/assets/38343d67-56f7-4a84-867b-46fa23631baa)
+
+### Signaux I2S:
+![image](https://github.com/user-attachments/assets/41c3bbe2-54c8-44bb-a17b-c9f75f2f23f0)
+
+### Observez à l’oscilloscope les différents signaux d’horloge:
+
+### Configuration du  DAC (Digital-to-Analog Converter):
+
+Notre microcontrôleur STM32 possède un convertisseur numérique-analogique (DAC) qui vas être utilisé pour générer des formes d'onde analogiques (un signal triangulaire) .
+
+![image](https://github.com/user-attachments/assets/77c5d397-bbdf-416a-b00e-ef1cdd255ab0)
+
+### Bypass numérique:
+
+***lecture les échantillons de l’ADC, et de l'écriture sur le DAC***
+
+![image](https://github.com/user-attachments/assets/e024d653-a6f7-407f-acde-8d398acdc963)
+
+### Visualisation:
+
