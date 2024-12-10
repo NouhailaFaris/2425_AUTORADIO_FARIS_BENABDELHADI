@@ -25,7 +25,7 @@
 #include "spi.h"
 #include "usart.h"
 #include "gpio.h"
-
+#include "sgtl5000.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -95,7 +95,34 @@ void Read_CHIP_ID_Debug(void) {
         printf("Erreur I2C\r\n", i2c_error);
     }
 }
+void Read_Write_Test_Register(void) {
+    uint8_t read_data[2] = {0};
+    uint16_t test_value = 0xABCD; // Exemple de valeur à écrire
+    uint8_t test_data[2] = { (test_value >> 8) & 0xFF, test_value & 0xFF };
 
+    printf("Lecture du registre avant écriture\r\n");
+    if (HAL_I2C_Mem_Read(&hi2c2, SGTL5000_I2C_ADDR, TEST_REGISTER, I2C_MEMADD_SIZE_16BIT, read_data, 2, HAL_MAX_DELAY) == HAL_OK) {
+        uint16_t value = (read_data[0]) | read_data[1];
+        printf("Valeur lue avant écriture : 0x%04X\r\n", value);
+    } else {
+        printf("Erreur lors de la lecture du registre avant écriture\r\n");
+    }
+
+    printf("Écriture dans le registre\r\n");
+    if (HAL_I2C_Mem_Write(&hi2c2, SGTL5000_I2C_ADDR, TEST_REGISTER, I2C_MEMADD_SIZE_16BIT, test_data, 2, HAL_MAX_DELAY) == HAL_OK) {
+        printf("Valeur écrite avec succès : 0x%04X\r\n", test_value);
+    } else {
+        printf("Erreur lors de l'écriture dans le registre\r\n");
+    }
+
+    printf("Lecture du registre après écriture\r\n");
+    if (HAL_I2C_Mem_Read(&hi2c2, SGTL5000_I2C_ADDR, TEST_REGISTER, I2C_MEMADD_SIZE_16BIT, read_data, 2, HAL_MAX_DELAY) == HAL_OK) {
+        uint16_t value = (read_data[0] << 8) | read_data[1];
+        printf("Valeur lue après écriture : 0x%04X\r\n", value);
+    } else {
+        printf("Erreur lors de la lecture du registre après écriture\r\n");
+    }
+}
 /* USER CODE END 0 */
 
 /**
@@ -140,6 +167,25 @@ int main(void)
   printf("Demarrage du systeme...\r\n");
   I2C_Scan();
   	Read_CHIP_ID_Debug();
+  	Read_Write_Test_Register();
+  		printf("Début des tests des registres SGTL5000\r\n");
+
+  		    // Tester chaque registre
+  		    Test_Register(&hi2c2, CHIP_ANA_POWER, 0x6AFF);
+  		    Test_Register(&hi2c2, CHIP_LINREG_CTRL, 0x006C);
+  		    Test_Register(&hi2c2, CHIP_REF_CTRL, 0x004E);
+  		    Test_Register(&hi2c2, CHIP_LINE_OUT_CTRL, 0x0322);
+  		    Test_Register(&hi2c2, CHIP_SHORT_CTRL, 0x1106);
+  		    Test_Register(&hi2c2, CHIP_ANA_CTRL, 0x0133);
+  		    Test_Register(&hi2c2, CHIP_DIG_POWER, 0x0073);
+  		    Test_Register(&hi2c2, CHIP_LINE_OUT_VOL, 0x0505);
+  		    Test_Register(&hi2c2, CHIP_CLK_CTRL, 0x0002);
+  		    Test_Register(&hi2c2, CHIP_I2S_CTRL, 0x0001);
+  		    Test_Register(&hi2c2, CHIP_ADCDAC_CTRL, 0x000C);
+  		    Test_Register(&hi2c2, CHIP_DAC_VOL, 0x3C3C);
+
+  		    printf("Tests terminés.\r\n");
+  		    printf("Démarrage du système...\r\n");
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in cmsis_os2.c) */
