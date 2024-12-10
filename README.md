@@ -7,6 +7,7 @@ Réalisé par FARIS et BENABDELHADI
 2-SPI 1 est utilisé sur le STM32 
 
 3/4-
+
 ![WhatsApp Image 2024-11-29 at 16 49 13](https://github.com/user-attachments/assets/1ea06745-c192-49a0-85aa-93f2810e6a95)
 
 5- 
