@@ -19,16 +19,19 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
+#include "adc.h"
+#include "dac.h"
 #include "dma.h"
 #include "i2c.h"
 #include "sai.h"
 #include "spi.h"
+#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
-#include "sgtl5000.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "sgtl5000.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -44,6 +47,10 @@
 #define BUFFER_SIZE 256  // Taille du buffer DMA
 uint16_t tx_buffer[BUFFER_SIZE];  // Buffer pour les données à transmettre
 uint16_t rx_buffer[BUFFER_SIZE];  // Buffer pour les données reçues
+#define TRIANGLE_STEPS 256  // Nombre d'échantillons dans un cycle
+uint16_t triangle_wave[TRIANGLE_STEPS];
+#define MAX_ADC_VALUE 4095
+uint16_t adc_buffer[BUFFER_SIZE];
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -126,6 +133,20 @@ void Read_Write_Test_Register(void) {
 		printf("Erreur lors de la lecture du registre après écriture\r\n");
 	}
 }
+void Generate_Triangle_Wave(void) {
+	for (int i = 0; i < TRIANGLE_STEPS / 2; i++) {
+		triangle_wave[i] = (4095 * i) / (TRIANGLE_STEPS / 2);  // Croissance linéaire
+	}
+	for (int i = TRIANGLE_STEPS / 2; i < TRIANGLE_STEPS; i++) {
+		triangle_wave[i] = 4095 - ((4095 * (i - TRIANGLE_STEPS / 2)) / (TRIANGLE_STEPS / 2));  // Décroissance linéaire
+	}
+
+	// Ajout de vérifications avec printf
+	printf("Signal triangulaire genere :\r\n");
+	for (int i = 0; i < TRIANGLE_STEPS; i++) {
+		printf("Echantillon %d : %d\r\n", i, triangle_wave[i]);
+	}
+}
 /* USER CODE END 0 */
 
 /**
@@ -136,7 +157,7 @@ int main(void)
 {
 
 	/* USER CODE BEGIN 1 */
-
+	HAL_StatusTypeDef status1, status2;
 	/* USER CODE END 1 */
 
 	/* MCU Configuration--------------------------------------------------------*/
@@ -165,6 +186,9 @@ int main(void)
 	MX_SPI3_Init();
 	MX_I2C2_Init();
 	MX_SAI2_Init();
+	MX_DAC1_Init();
+	MX_TIM6_Init();
+	MX_ADC1_Init();
 	/* USER CODE BEGIN 2 */
 	__HAL_SAI_ENABLE(&hsai_BlockA2);
 	printf("Demarrage du systeme...\r\n");
@@ -196,6 +220,32 @@ int main(void)
 	}
 
 	printf("Transmission I2S démarrée avec succès\r\n");
+
+
+	// Génération du signal triangulaire
+	Generate_Triangle_Wave();
+
+	// Démarrer l'ADC
+	status1 = HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc_buffer, BUFFER_SIZE);
+	if (status1 != HAL_OK) {
+		printf("Erreur ADC DMA : %d\r\n", status1);
+		Error_Handler();
+	}
+
+	// Démarrer le DAC
+	status2 = HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, (uint32_t *)adc_buffer, BUFFER_SIZE, DAC_ALIGN_12B_R);
+	if (status2 != HAL_OK) {
+		printf("Erreur DAC DMA : %d\r\n", status2);
+		Error_Handler();
+	}
+
+	// Démarrer le Timer 6 pour synchroniser les mises à jour du DAC
+	if (HAL_TIM_Base_Start(&htim6) != HAL_OK) {
+		printf("Erreur : Impossible de démarrer le Timer 6\r\n");
+		Error_Handler();
+	}
+	printf("Initialisation terminée...\r\n");
+	printf("Signal triangulaire envoyé au DAC...\r\n");
 
 	/* USER CODE END 2 */
 
@@ -278,15 +328,16 @@ void PeriphCommonClock_Config(void)
 
 	/** Initializes the peripherals clock
 	 */
-	PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_SAI2;
+	PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_SAI2|RCC_PERIPHCLK_ADC;
 	PeriphClkInit.Sai2ClockSelection = RCC_SAI2CLKSOURCE_PLLSAI1;
+	PeriphClkInit.AdcClockSelection = RCC_ADCCLKSOURCE_PLLSAI1;
 	PeriphClkInit.PLLSAI1.PLLSAI1Source = RCC_PLLSOURCE_HSI;
 	PeriphClkInit.PLLSAI1.PLLSAI1M = 1;
 	PeriphClkInit.PLLSAI1.PLLSAI1N = 13;
 	PeriphClkInit.PLLSAI1.PLLSAI1P = RCC_PLLP_DIV17;
 	PeriphClkInit.PLLSAI1.PLLSAI1Q = RCC_PLLQ_DIV2;
 	PeriphClkInit.PLLSAI1.PLLSAI1R = RCC_PLLR_DIV2;
-	PeriphClkInit.PLLSAI1.PLLSAI1ClockOut = RCC_PLLSAI1_SAI1CLK;
+	PeriphClkInit.PLLSAI1.PLLSAI1ClockOut = RCC_PLLSAI1_SAI1CLK|RCC_PLLSAI1_ADC1CLK;
 	if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
 	{
 		Error_Handler();
