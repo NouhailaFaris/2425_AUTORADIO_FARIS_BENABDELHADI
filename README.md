@@ -105,6 +105,8 @@ Ces broches correspondent au I2C2 dans le STM32 L476RG.
 
 ### Configuration:
 
+Configuration de l'I2C pour la gestion des registres du CODEC.
+
 ![image](https://github.com/user-attachments/assets/088c63a5-67f1-4265-9644-69022190d343)
 
 ![image](https://github.com/user-attachments/assets/1ffd857c-37e3-4d9d-abd4-fd437adf69e1)
