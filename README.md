@@ -29,7 +29,7 @@ Ce TP vise à développer un système d'autoradio en utilisant une carte STM32 N
 
 ## 2.1 Configuration
 
-1-
+1-Identification et configuration des paramètres SPI dans STM32CubeIDE.
 
 ![image](https://github.com/user-attachments/assets/38418675-5ab3-4d69-b5c0-69a321d16b02)
 
