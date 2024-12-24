@@ -43,7 +43,7 @@ Ce TP vise à développer un système d'autoradio en utilisant une carte STM32 N
 
 . Données envoyées en MSB first.
 
-. Mode CPOL = 0 et CPHA = 0.
+. Mode CPOL = 0 et CPHA = 1 Edge.
 
 ![image](https://github.com/user-attachments/assets/723572ae-4657-4ad3-933d-c4e695a57bdf)
 
