@@ -103,15 +103,13 @@ Pins utilisées pour l’I2C:
 
 Ces broches correspondent au I2C2 dans le STM32 L476RG.
 
-### Configuration:
-
-Configuration de l'I2C pour la gestion des registres du CODEC.
+### Configuration de l'I2C pour la gestion des registres du CODEC.
 
 ![image](https://github.com/user-attachments/assets/088c63a5-67f1-4265-9644-69022190d343)
 
 ![image](https://github.com/user-attachments/assets/1ffd857c-37e3-4d9d-abd4-fd437adf69e1)
 
-### Signal MCLK
+### Vérification de l'horloge MCLK
 
 ![scope_1](https://github.com/user-attachments/assets/15dea245-b1a5-43cf-a54c-e2c7bacb927a)
 
