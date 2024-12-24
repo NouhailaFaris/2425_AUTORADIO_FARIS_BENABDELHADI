@@ -153,8 +153,8 @@ Ces broches correspondent au I2C2 dans le STM32 L476RG.
 
 ### Fonction utiliser dans fichier sgtl5000
 
+**Fonction d'initialisation du SGTL5000**
 ```
-/* Fonction d'initialisation du SGTL5000 */
 HAL_StatusTypeDef sgtl5000_init(h_sgtl5000_t *h_sgtl5000) {
     HAL_StatusTypeDef ret = HAL_OK;
     uint16_t mask;
@@ -212,9 +212,8 @@ HAL_StatusTypeDef sgtl5000_init(h_sgtl5000_t *h_sgtl5000) {
 }
 
 ```
-
+**Fonction pour écrire dans un registre du SGTL5000**
 ```
-/* Fonction pour écrire dans un registre du SGTL5000 */
 HAL_StatusTypeDef sgtl5000_i2c_write_register(h_sgtl5000_t *h_sgtl5000, uint16_t reg, uint16_t value) {
     uint8_t data[4];
     data[0] = (reg >> 8) & 0xFF;
@@ -225,8 +224,8 @@ HAL_StatusTypeDef sgtl5000_i2c_write_register(h_sgtl5000_t *h_sgtl5000, uint16_t
     return HAL_I2C_Master_Transmit(h_sgtl5000->hi2c, h_sgtl5000->i2c_address, data, 4, HAL_MAX_DELAY);
 }
 ```
+**Fonction pour lire un registre du SGTL5000**
 ```
-/* Fonction pour lire un registre du SGTL5000 */
 HAL_StatusTypeDef sgtl5000_i2c_read_register(h_sgtl5000_t *h_sgtl5000, uint16_t reg, uint16_t *value) {
     uint8_t reg_data[2] = { (reg >> 8) & 0xFF, reg & 0xFF };
     uint8_t data[2];
@@ -241,9 +240,13 @@ HAL_StatusTypeDef sgtl5000_i2c_read_register(h_sgtl5000_t *h_sgtl5000, uint16_t 
     return HAL_OK;
 }
 ```
+#### Test de Notre configuration
 ![image](https://github.com/user-attachments/assets/38343d67-56f7-4a84-867b-46fa23631baa)
 
 ### Signaux I2S:
+
+**Démarrage la réception et la transmission sur l’I2S avec le SAI :**
+
 ![image](https://github.com/user-attachments/assets/41c3bbe2-54c8-44bb-a17b-c9f75f2f23f0)
 
 ### Observez à l’oscilloscope les différents signaux d’horloge:
