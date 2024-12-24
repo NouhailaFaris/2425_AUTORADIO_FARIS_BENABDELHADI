@@ -76,12 +76,17 @@ Pour Tester on a fixer notre NRESET à 1 par un GPIO out (PA0).
 
 ### Utilisation du Driver avec le shell 
 
-2 fonction sont réalisé :
+Écriture d'un driver permettant de piloter les LED avec une structure.
 
-a = allumer tout les leds 
+Fonctionnalités du shell :
 
-l avec 2 argument =  pour allumer une led specifique ou l'eteindre 
+Commande 'a': Allume toutes les LED.
 
+Commande 'l': Accepte deux arguments :
+
+Le premier argument pour identifier la LED spécifique.
+
+Le second argument pour l'état (1 pour allumer, 0 pour éteindre).
 ![image](https://github.com/user-attachments/assets/0e95ceca-a1b2-4067-bc5b-c525b3b96929)
 
 
