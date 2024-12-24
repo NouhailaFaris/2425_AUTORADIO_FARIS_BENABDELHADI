@@ -1,5 +1,10 @@
 # 2425_AUTORADIO_FARIS_BENABDELHADI-
 Réalisé par FARIS et BENABDELHADI
+
+# Objectif TP
+
+Ce TP vise à développer un système d'autoradio en utilisant une carte STM32 NUCLEO_L476RG avec plusieurs périphériques. L'objectif est de maîtriser la configuration matérielle et logicielle, ainsi que l'intégration des protocoles de communication et des fonctionnalités audio.
+
 # 1 Démarrage 
 
 1-Réference GPIO Expander: MCP23S17-E/SO
