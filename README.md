@@ -11,20 +11,17 @@ Ce TP vise à développer un système d'autoradio en utilisant une carte STM32 N
 
 2-SPI 1 est utilisé sur le STM32 
 
-3/4-
+3/4-Activation de la fonction printf pour le débogage.
 
 ![WhatsApp Image 2024-11-29 at 16 49 13](https://github.com/user-attachments/assets/1ea06745-c192-49a0-85aa-93f2810e6a95)
 
-5- 
+5- Activation et configuration de FreeRTOS en mode CMSIS V1.
 
 ![image](https://github.com/user-attachments/assets/54373661-c2ab-4fd3-921c-7e0393af262d)
 
-6)a-
-
+6) Mise en place d'un shell fonctionnel :
 
 ![WhatsApp Image 2024-11-29 at 16 49 13](https://github.com/user-attachments/assets/91c9f921-2b21-42b3-a5ed-78e3a3b188ea)
-
-6)b-
 
 ![WhatsApp Image 2024-11-29 at 16 56 05](https://github.com/user-attachments/assets/f0fa2efb-67ac-48bc-bc9c-b6b3a79fa6ae)
 
