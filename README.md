@@ -151,8 +151,96 @@ Ces broches correspondent au I2C2 dans le STM32 L476RG.
 
 — CHIP_DAC_VOL: 0x3C3C
 
-**config**
+### Fonction utiliser dans fichier sgtl5000
 
+```
+/* Fonction d'initialisation du SGTL5000 */
+HAL_StatusTypeDef sgtl5000_init(h_sgtl5000_t *h_sgtl5000) {
+    HAL_StatusTypeDef ret = HAL_OK;
+    uint16_t mask;
+
+    // Désactivation de l'alimentation initiale
+    mask = (1 << 12) | (1 << 13);
+    ret = sgtl5000_i2c_clear_bit(h_sgtl5000, SGTL5000_CHIP_ANA_POWER, mask);
+    if (ret != HAL_OK) return ret;
+
+    // Activation du charge pump
+    mask = (1 << 5) | (1 << 6);
+    ret = sgtl5000_i2c_set_bit(h_sgtl5000, SGTL5000_CHIP_LINREG_CTRL, mask);
+    if (ret != HAL_OK) return ret;
+
+    // Configuration des tensions de référence
+    mask = 0x01FF; // VAG_VAL = 1.575V, BIAS_CTRL = -50%, SMALL_POP = 1
+    ret = sgtl5000_i2c_write_register(h_sgtl5000, SGTL5000_CHIP_REF_CTRL, mask);
+    if (ret != HAL_OK) return ret;
+
+    // Configuration de la sortie ligne
+    mask = 0x031E;
+    ret = sgtl5000_i2c_write_register(h_sgtl5000, SGTL5000_CHIP_LINE_OUT_CTRL, mask);
+    if (ret != HAL_OK) return ret;
+
+    // Configuration des courts-circuits
+    mask = 0x1106;
+    ret = sgtl5000_i2c_write_register(h_sgtl5000, SGTL5000_CHIP_SHORT_CTRL, mask);
+    if (ret != HAL_OK) return ret;
+
+    // Activation des blocs
+    mask = 0x6AFF;
+    ret = sgtl5000_i2c_write_register(h_sgtl5000, SGTL5000_CHIP_ANA_POWER, mask);
+    if (ret != HAL_OK) return ret;
+
+    mask = 0x0073;
+    ret = sgtl5000_i2c_write_register(h_sgtl5000, SGTL5000_CHIP_DIG_POWER, mask);
+    if (ret != HAL_OK) return ret;
+
+    // Configuration des volumes
+    mask = 0x1111;
+    ret = sgtl5000_i2c_write_register(h_sgtl5000, SGTL5000_CHIP_LINE_OUT_VOL, mask);
+    if (ret != HAL_OK) return ret;
+
+    // Configuration de l'horloge
+    mask = 0x0004;
+    ret = sgtl5000_i2c_write_register(h_sgtl5000, SGTL5000_CHIP_CLK_CTRL, mask);
+    if (ret != HAL_OK) return ret;
+
+    // Configuration des données I2S
+    mask = 0x0130;
+    ret = sgtl5000_i2c_write_register(h_sgtl5000, SGTL5000_CHIP_I2S_CTRL, mask);
+    if (ret != HAL_OK) return ret;
+
+    return ret;
+}
+
+```
+
+```
+/* Fonction pour écrire dans un registre du SGTL5000 */
+HAL_StatusTypeDef sgtl5000_i2c_write_register(h_sgtl5000_t *h_sgtl5000, uint16_t reg, uint16_t value) {
+    uint8_t data[4];
+    data[0] = (reg >> 8) & 0xFF;
+    data[1] = reg & 0xFF;
+    data[2] = (value >> 8) & 0xFF;
+    data[3] = value & 0xFF;
+
+    return HAL_I2C_Master_Transmit(h_sgtl5000->hi2c, h_sgtl5000->i2c_address, data, 4, HAL_MAX_DELAY);
+}
+```
+```
+/* Fonction pour lire un registre du SGTL5000 */
+HAL_StatusTypeDef sgtl5000_i2c_read_register(h_sgtl5000_t *h_sgtl5000, uint16_t reg, uint16_t *value) {
+    uint8_t reg_data[2] = { (reg >> 8) & 0xFF, reg & 0xFF };
+    uint8_t data[2];
+
+    HAL_StatusTypeDef ret = HAL_I2C_Master_Transmit(h_sgtl5000->hi2c, h_sgtl5000->i2c_address, reg_data, 2, HAL_MAX_DELAY);
+    if (ret != HAL_OK) return ret;
+
+    ret = HAL_I2C_Master_Receive(h_sgtl5000->hi2c, h_sgtl5000->i2c_address, data, 2, HAL_MAX_DELAY);
+    if (ret != HAL_OK) return ret;
+
+    *value = (data[0] << 8) | data[1];
+    return HAL_OK;
+}
+```
 ![image](https://github.com/user-attachments/assets/38343d67-56f7-4a84-867b-46fa23631baa)
 
 ### Signaux I2S:
