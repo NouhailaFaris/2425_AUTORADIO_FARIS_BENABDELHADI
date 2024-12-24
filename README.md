@@ -29,13 +29,21 @@ Ce TP vise à développer un système d'autoradio en utilisant une carte STM32 N
 
 ## 2.1 Configuration
 
-1-Identification et configuration des paramètres SPI dans STM32CubeIDE.
+1-Référence du GPIO Expander : MCP23S17
 
 ![image](https://github.com/user-attachments/assets/38418675-5ab3-4d69-b5c0-69a321d16b02)
 
 2- Le SPI 1 est deja utilisé par le STM32
 
-3- il faut configurer le SPI MOSI/ SPI MISO/ SPI SCK/ SPI NCS comme dans le modele Kicad
+3- Paramètres STM32CubeIDE :
+
+. Configuration du SPI en mode maître.
+
+. Horloge configurée à 1 MHz.
+
+. Données envoyées en MSB first.
+
+. Mode CPOL = 0 et CPHA = 0.
 
 ![image](https://github.com/user-attachments/assets/723572ae-4657-4ad3-933d-c4e695a57bdf)
 
