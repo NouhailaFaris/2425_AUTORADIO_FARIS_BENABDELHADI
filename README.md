@@ -19,7 +19,7 @@ Ce TP vise à développer un système d'autoradio en utilisant une carte STM32 N
 
 ![image](https://github.com/user-attachments/assets/54373661-c2ab-4fd3-921c-7e0393af262d)
 
-6) Mise en place d'un shell fonctionnel :
+6- Mise en place d'un shell fonctionnel :
 
 ![WhatsApp Image 2024-11-29 at 16 49 13](https://github.com/user-attachments/assets/91c9f921-2b21-42b3-a5ed-78e3a3b188ea)
 
@@ -92,7 +92,7 @@ Le second argument pour l'état (1 pour allumer, 0 pour éteindre).
 ![image](https://github.com/user-attachments/assets/0e95ceca-a1b2-4067-bc5b-c525b3b96929)
 
 
-## 3. Le CODEC Audio SGTL5000
+# 3. Le CODEC Audio SGTL5000
 ### 3. 1 Configuration préalables
 
 Pins utilisées pour l’I2C:
@@ -263,4 +263,40 @@ Notre microcontrôleur STM32 possède un convertisseur numérique-analogique (DA
 ***lecture les échantillons de l’ADC, et de l'écriture sur le DAC***
 
 ![image](https://github.com/user-attachments/assets/e024d653-a6f7-407f-acde-8d398acdc963)
+
+## 5. Filtre RC
+**Expressions de A, B et D :**
+𝑅𝐶=1/2𝜋𝑓𝑐
+A=fs (fréquence d'échantillonnage)
+𝐵=𝑅𝐶
+𝐷=𝑅𝐶+1/𝑓𝑠
+
+**Cycles processeur disponibles :**
+Avec une fréquence d'échantillonnage de 48 kHz et un processeur à 170 MHz :
+Temps par échantillon :
+𝑇=1/48000 ≈ 20.83𝜇𝑠
+Cycles processeur :
+170×10^6x20.83x10^(−6) ≈ 3541𝑐𝑦𝑐𝑙𝑒𝑠
+
+**Fonction d’initialisation :**
+RC_filter_init() :
+```
+void RC_filter_init(h_RC_filter_t *h_RC_filter, uint16_t cutoff_frequency, uint16_t sampling_frequency) {
+    float RC = 1.0 / (2 * 3.1416 * cutoff_frequency);
+    float dt = 1.0 / sampling_frequency;
+
+    h_RC_filter->coeff_A = (uint32_t)(dt / (RC + dt) * 65536);
+    h_RC_filter->coeff_B = (uint32_t)(RC / (RC + dt) * 65536);
+    h_RC_filter->coeff_D = 65536;
+    h_RC_filter->out_prev = 0;
+}
+```
+Commande Shell :
+Pour modifier la fréquence de coupure depuis le Shell :
+```
+void shell_set_cutoff(h_RC_filter_t *h_RC_filter, uint16_t cutoff, uint16_t sampling) {
+    RC_filter_init(h_RC_filter, cutoff, sampling);
+}
+
+```
 
