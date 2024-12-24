@@ -125,7 +125,7 @@ Ces broches correspondent au I2C2 dans le STM32 L476RG.
 
 ![scope_0](https://github.com/user-attachments/assets/97d2ad78-aa4f-4438-bae0-850677dc9583)
 
-**5**
+###  la valeur à assigner aux registres : 
 
 — CHIP_ANA_POWER: 0x6AFF
 
