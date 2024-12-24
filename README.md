@@ -113,6 +113,10 @@ Ces broches correspondent au I2C2 dans le STM32 L476RG.
 
 ![scope_1](https://github.com/user-attachments/assets/15dea245-b1a5-43cf-a54c-e2c7bacb927a)
 
+### Tests :
+
+## Lecture du registre CHIP_ID via I2C et vérification des trames sur oscilloscope :
+
 ![image](https://github.com/user-attachments/assets/5ec7929f-fee0-4a5a-a459-cbe490cafe41)
 
 ![image](https://github.com/user-attachments/assets/7c6f0cca-d996-4794-b3c7-0dd7e8ae576d)
