@@ -66,13 +66,14 @@ Pour Tester on a fixer notre NRESET à 1 par un GPIO out (PA0).
 
 ![WhatsApp Image 2024-12-03 at 11 24 23](https://github.com/user-attachments/assets/76d48152-f890-4c09-ad66-b5fd9d58ca21)
 
-## 2.3 Driver 
+## un chenillard 
 
 
 ![image](https://github.com/user-attachments/assets/e74f3bcb-2989-41df-b8e6-621c9ef47de4)
 
 ![image](https://github.com/user-attachments/assets/4f3ae65a-d6af-47c6-97bd-3d273e28a9d5)
 
+## 2.3  Driver
 
 ### Utilisation du Driver avec le shell 
 
@@ -87,11 +88,13 @@ Commande 'l': Accepte deux arguments :
 Le premier argument pour identifier la LED spécifique.
 
 Le second argument pour l'état (1 pour allumer, 0 pour éteindre).
+
 ![image](https://github.com/user-attachments/assets/0e95ceca-a1b2-4067-bc5b-c525b3b96929)
 
 
-## Le CODEC Audio SGTL5000
-### Configuration préalables
+## 3. Le CODEC Audio SGTL5000
+### 3. 1 Configuration préalables
+
 Pins utilisées pour l’I2C:
 
 . I2C_SCL : PB10
